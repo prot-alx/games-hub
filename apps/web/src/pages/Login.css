@@ -171,6 +171,44 @@
   font-size: 0.9rem;
 }
 
+.guest-login {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.divider {
+  margin: 1rem 0;
+  position: relative;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.guest-button {
+  background: #f5f5f5;
+  color: #333;
+  border: 2px solid #ddd;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.guest-button:hover {
+  background: #ebebeb;
+  border-color: #ccc;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 1.5rem;

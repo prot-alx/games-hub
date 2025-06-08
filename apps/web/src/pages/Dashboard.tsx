@@ -21,7 +21,9 @@ export default function Dashboard() {
               <div className="user-info">
                 <div className="info-item">
                   <span className="info-label">ID:</span>
-                  <span className="info-value">{user.userId}</span>
+                  <span className="info-value">
+                    {user.isGuest ? "Гость" : user.userId}
+                  </span>
                 </div>
                 <div className="info-item">
                   <span className="info-label">Username:</span>

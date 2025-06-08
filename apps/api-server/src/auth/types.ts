@@ -6,10 +6,11 @@ export interface TelegramUser {
 }
 
 export interface UserData {
-  sub: number;
+  sub: number | string;
   username?: string;
   first_name: string;
   last_name?: string;
+  isGuest?: boolean;
 }
 
 export interface QRLoginResponse {
@@ -34,9 +35,10 @@ export interface SecurityStats {
 }
 
 export interface AuthenticatedUser {
-  userId: number;
+  userId: number | string;
   username?: string;
   first_name?: string;
+  isGuest?: boolean;
 }
 
 export interface TelegramUser {
@@ -63,10 +65,11 @@ export interface PendingSession {
 }
 
 export interface JwtPayload {
-  sub: number;
+  sub: number | string;
   username?: string;
   first_name: string;
   last_name?: string;
+  isGuest?: boolean;
   iat?: number;
   exp?: number;
 }

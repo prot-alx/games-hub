@@ -75,6 +75,22 @@ export default function QRLogin() {
     }
   };
 
+  const handleGuestLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/auth/guest", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        await checkAuth();
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.error("Ошибка гостевого входа:", error);
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -94,7 +110,10 @@ export default function QRLogin() {
             </div>
 
             <div className="instructions">
-              <p>Отсканируйте QR-код в мобильном Telegram</p>
+              <p>
+                Отсканируйте QR-код в мобильном Telegram, отправьте боту команду
+                /start
+              </p>
 
               <div className="alternatives">
                 <p className="alternatives-title">
@@ -141,6 +160,14 @@ export default function QRLogin() {
             <p>Перенаправление на главную страницу...</p>
           </div>
         )}
+        <div className="guest-login">
+          <div className="divider">
+            <span>или</span>
+          </div>
+          <button onClick={handleGuestLogin} className="guest-button">
+            Войти как гость
+          </button>
+        </div>
       </div>
     </div>
   );

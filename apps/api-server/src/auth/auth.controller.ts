@@ -10,7 +10,7 @@ import {
 import { Response, Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { QRStatusResponse, AuthenticatedUser } from './types';
+import { QRStatusResponse, AuthenticatedUser, UserData } from './types';
 
 type QRStatusCheckResponse = Omit<QRStatusResponse, 'token'>;
 
@@ -49,6 +49,24 @@ export class AuthController {
     }
 
     return { status: result.status };
+  }
+
+  @Post('guest')
+  loginAsGuest(@Res({ passthrough: true }) response: Response): {
+    user: UserData;
+  } {
+    const result = this.authService.generateGuestToken();
+
+    response.cookie('access_token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return {
+      user: result.user,
+    };
   }
 
   @Get('me')

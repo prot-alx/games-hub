@@ -4,6 +4,7 @@ interface User {
   userId: number;
   username?: string;
   first_name?: string;
+  isGuest?: boolean;
 }
 
 export function useAuth() {

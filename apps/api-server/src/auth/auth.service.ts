@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
-import { PendingSession, TelegramUser } from './types';
+import { PendingSession, TelegramUser, UserData } from './types';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +15,22 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {
     setInterval(() => this.cleanExpiredSessions(), 60000);
+  }
+
+  generateGuestToken(): { token: string; user: UserData } {
+    const guestId = `guest_${randomBytes(8).toString('hex')}`;
+
+    const payload: UserData = {
+      sub: guestId,
+      first_name: 'Гость',
+      isGuest: true,
+    };
+
+    const token = this.jwtService.sign(payload, {
+      expiresIn: '24h',
+    });
+
+    return { token, user: payload };
   }
 
   generateQRLogin(): { sessionId: string; qrData: string; expiresIn: number } {
