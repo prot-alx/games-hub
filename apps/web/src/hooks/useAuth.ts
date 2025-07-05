@@ -1,3 +1,4 @@
+import { API_URL } from "./../../config/config";
 import { useState, useEffect } from "react";
 
 interface User {
@@ -18,7 +19,7 @@ export function useAuth() {
 
   const checkAuth = async (): Promise<boolean> => {
     try {
-      const response = await fetch("http://localhost:3001/auth/me", {
+      const response = await fetch(API_URL, {
         credentials: "include",
       });
 
@@ -41,7 +42,7 @@ export function useAuth() {
 
   const logout = async (): Promise<void> => {
     try {
-      await fetch("http://localhost:3001/auth/logout", {
+      await fetch(API_URL, {
         method: "POST",
         credentials: "include",
       });
