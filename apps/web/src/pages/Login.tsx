@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import "./Login.css";
+import { API_URL } from "../../config/config";
 
 type LoginStatus = "loading" | "pending" | "expired" | "success";
 
@@ -16,7 +17,7 @@ export default function QRLogin() {
   const generateQR = async () => {
     setStatus("loading");
     try {
-      const res = await fetch("http://localhost:3001/auth/qr/generate", {
+      const res = await fetch(`${API_URL}/auth/qr/generate`, {
         method: "POST",
       });
       const data = await res.json();
@@ -37,12 +38,9 @@ export default function QRLogin() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3001/auth/qr/status/${sessionId}`,
-          {
-            credentials: "include",
-          }
-        );
+        const res = await fetch(`${API_URL}/auth/qr/status/${sessionId}`, {
+          credentials: "include",
+        });
         const data = await res.json();
         if (data.status === "confirmed") {
           setStatus("success");
@@ -77,7 +75,7 @@ export default function QRLogin() {
 
   const handleGuestLogin = async () => {
     try {
-      const res = await fetch("http://localhost:3001/auth/guest", {
+      const res = await fetch(`${API_URL}/auth/guest`, {
         method: "POST",
         credentials: "include",
       });
