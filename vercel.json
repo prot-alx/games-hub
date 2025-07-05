@@ -1,18 +1,27 @@
 {
   "version": 2,
+  "buildCommand": "turbo build",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "pnpm install",
   "builds": [
     {
-      "src": "apps/web/package.json",
-      "use": "@vercel/static-build",
-      "config": { 
-        "distDir": "dist"
-      }
+      "src": "apps/api-server/dist/main.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "apps/api-server/dist/main.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "apps/web/dist/$1"
     }
-  ]
+  ],
+  "functions": {
+    "apps/api-server/dist/main.js": {
+      "maxDuration": 30
+    }
+  }
 }
