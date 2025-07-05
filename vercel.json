@@ -7,25 +7,12 @@
       "config": { 
         "distDir": "dist"
       }
-    },
-    {
-      "src": "apps/api-server/src/main.ts",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "apps/api-server/src/main.ts"
-    },
-    {
       "src": "/(.*)",
       "dest": "apps/web/dist/$1"
     }
-  ],
-  "functions": {
-    "apps/api-server/src/main.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
