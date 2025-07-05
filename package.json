@@ -4,10 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start:api": "pnpm --filter ./apps/api-server run start",
-    "start:web": "pnpm --filter ./apps/web run dev",
-    "start:all": "concurrently \"pnpm start:api\" \"pnpm start:web\""
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "start": "turbo start", 
+    "lint": "turbo lint",
+    "test": "turbo test",
+    
+    "dev:api": "pnpm --filter ./apps/api-server run start:dev",
+    "dev:web": "pnpm --filter ./apps/web run dev",
+    "dev:all": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
+    
+    "build:api": "pnpm --filter ./apps/api-server run build",
+    "build:web": "pnpm --filter ./apps/web run build",
+    
+    "db:generate": "pnpm --filter ./apps/api-server run db:generate",
+    "db:push": "pnpm --filter ./apps/api-server run db:push",
+    "db:studio": "pnpm --filter ./apps/api-server run db:studio"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +29,7 @@
     "concurrently": "^9.1.2",
     "eslint": "^9.27.0",
     "prettier": "^3.5.3",
+    "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
   "private": true,
