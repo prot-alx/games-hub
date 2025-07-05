@@ -8,8 +8,13 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  const allowedOrigins =
+    process.env.NODE_ENV === 'production'
+      ? ['https://games-hub-web.vercel.app']
+      : ['http://localhost:3000', 'http://localhost:5173'];
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: allowedOrigins,
     credentials: true,
   });
 
