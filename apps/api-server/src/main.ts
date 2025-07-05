@@ -2,17 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import * as fs from 'fs';
+import * as https from 'https';
+import * as path from 'path';
 
 async function bootstrap() {
+  const isProd = process.env.NODE_ENV === 'production';
+
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
 
-  const allowedOrigins =
-    process.env.NODE_ENV === 'production'
-      ? ['https://games-hub-web.vercel.app', 'https://editor.ddns.net:49236']
-      : ['http://localhost:3000', 'http://localhost:5173'];
+  const allowedOrigins = isProd
+    ? ['https://games-hub-web.vercel.app', 'https://editor.ddns.net:49236']
+    : ['http://localhost:3000', 'http://localhost:5173'];
 
   app.enableCors({
     origin: allowedOrigins,
@@ -23,16 +27,24 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
   }
 
-  await app.listen(process.env.PORT ?? 3001);
-  console.log('Сервер запущен на порту', process.env.PORT ?? 3001);
+  const port = Number(process.env.PORT) || (isProd ? 49236 : 3001);
+
+  if (isProd) {
+    const httpsOptions = {
+      key: fs.readFileSync(path.resolve('certs/key.pem')),
+      cert: fs.readFileSync(path.resolve('certs/cert.pem')),
+    };
+    const server = https.createServer(
+      httpsOptions,
+      app.getHttpAdapter().getInstance(),
+    );
+    server.listen(port, () => {
+      console.log(`🚀 HTTPS сервер запущен на порту ${port}`);
+    });
+  } else {
+    await app.listen(port);
+    console.log(`🚀 HTTP сервер запущен на порту ${port}`);
+  }
 }
 
-if (process.env.VERCEL) {
-  bootstrap();
-}
-
-if (!process.env.VERCEL) {
-  bootstrap();
-}
-
-export default bootstrap;
+bootstrap();
