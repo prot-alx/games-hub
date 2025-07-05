@@ -11,7 +11,7 @@ async function bootstrap() {
 
   const allowedOrigins =
     process.env.NODE_ENV === 'production'
-      ? ['https://games-hub-web.vercel.app']
+      ? ['https://games-hub-web.vercel.app', 'https://editor.ddns.net:49236']
       : ['http://localhost:3000', 'http://localhost:5173'];
 
   app.enableCors({
