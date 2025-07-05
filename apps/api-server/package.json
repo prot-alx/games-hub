@@ -22,7 +22,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "vercel-build": "nest build"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

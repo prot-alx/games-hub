@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
+  app.useGlobalPipes(new ValidationPipe());
 
   const allowedOrigins =
     process.env.NODE_ENV === 'production'
@@ -18,10 +19,20 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  if (process.env.VERCEL) {
+    app.setGlobalPrefix('api');
+  }
 
   await app.listen(process.env.PORT ?? 3001);
   console.log('Сервер запущен на порту', process.env.PORT ?? 3001);
 }
 
-bootstrap();
+if (process.env.VERCEL) {
+  bootstrap();
+}
+
+if (!process.env.VERCEL) {
+  bootstrap();
+}
+
+export default bootstrap;
