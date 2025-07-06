@@ -22,7 +22,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  if (process.env.VERCEL) {
+  if (isProd) {
     app.setGlobalPrefix('api');
   }
 
