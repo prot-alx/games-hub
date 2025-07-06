@@ -4,7 +4,6 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
 import * as https from 'https';
-import * as path from 'path';
 
 async function bootstrap() {
   const isProd = process.env.NODE_ENV === 'production';
@@ -31,8 +30,12 @@ async function bootstrap() {
 
   if (isProd) {
     const httpsOptions = {
-      key: fs.readFileSync(path.resolve('certs/key.pem')),
-      cert: fs.readFileSync(path.resolve('certs/cert.pem')),
+      key: fs.readFileSync(
+        '/etc/letsencrypt/live/gameshub.duckdns.org/privkey.pem',
+      ),
+      cert: fs.readFileSync(
+        '/etc/letsencrypt/live/gameshub.duckdns.org/fullchain.pem',
+      ),
     };
     const server = https.createServer(
       httpsOptions,
