@@ -39,15 +39,15 @@ jobs:
           git pull origin main
           
           echo "Installing dependencies..."
-          pnpm install
+          /root/.nvm/versions/node/v22.13.1/bin/pnpm install
           
           echo "Building API..."
-          pnpm build:api
+          /root/.nvm/versions/node/v22.13.1/bin/pnpm build:api
           
           echo "Restarting application..."
           pkill -f "node dist/main.js" || true
           sleep 2
-          nohup pnpm start:prod:api > /dev/null 2>&1 &
+          nohup /root/.nvm/versions/node/v22.13.1/bin/pnpm start:prod:api > /dev/null 2>&1 &
           
           echo "Waiting for startup..."
           sleep 5
