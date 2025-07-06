@@ -7,9 +7,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .loading-content {
   text-align: center;
   font-size: 18px;
+}
+
+.loading-content .spinner {
+  margin-bottom: 20px;
 }

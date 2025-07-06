@@ -1,3 +1,4 @@
+import Spinner from "../components/Spinner";
 import { useAuth } from "../hooks/useAuth";
 import "./Dashboard.css";
 
@@ -40,7 +41,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="loading-user">
-                <div className="spinner"></div>
+                <Spinner />
                 <p>Загрузка данных пользователя...</p>
               </div>
             )}
