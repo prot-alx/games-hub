@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import "./Login.css";
 import { API_URL } from "../../config/config";
+import Spinner from "../components/Spinner";
 
 type LoginStatus =
   | "loading"
@@ -114,7 +115,7 @@ export default function QRLogin() {
 
         {status === "loading" && (
           <div className="loading-state">
-            <div className="spinner"></div>
+            <Spinner />
             <p>Генерация QR-кода...</p>
           </div>
         )}
