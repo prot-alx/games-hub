@@ -29,12 +29,6 @@ async function bootstrap() {
   }
   await app.init();
 
-  console.log('=== ПРОВЕРКА РОУТОВ ===');
-  const httpAdapter = app.getHttpAdapter();
-  const instance = httpAdapter.getInstance();
-  console.log('HTTP adapter type:', httpAdapter.constructor.name);
-  console.log('Routes registered:', !!instance._router);
-
   const port = Number(process.env.PORT) || (isProd ? 49236 : 3001);
 
   if (isProd) {
