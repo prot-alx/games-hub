@@ -40,6 +40,14 @@ export class TelegramService implements OnModuleInit {
       });
     });
 
+    this.bot.on('message', (msg) => {
+      const text = msg.text?.trim();
+      if (!text || text.startsWith('/start')) return;
+      this.sendStartButton(msg.chat.id).catch((error) => {
+        this.logger.error('Ошибка при показе кнопки:', error);
+      });
+    });
+
     this.bot.on('polling_error', (error) => {
       this.logger.error('Telegram polling error:', error.message);
     });
@@ -74,7 +82,10 @@ export class TelegramService implements OnModuleInit {
         last_name: msg.from.last_name,
       });
 
-      await this.bot.sendMessage(chatId, '✅ Вход подтвержден!');
+      await this.bot.sendMessage(
+        chatId,
+        '✅ Вход подтвержден! Вернитесь на вкладку браузера!',
+      );
     } catch (error: unknown) {
       const message = this.getErrorMessage(error);
 
@@ -108,9 +119,24 @@ export class TelegramService implements OnModuleInit {
 
   private async handleStartCommand(msg: TelegramBot.Message): Promise<void> {
     const chatId = msg.chat.id;
+
     await this.bot.sendMessage(
       chatId,
-      'Привет! Этот бот используется для входа на сайт через QR-код.\n\nПросто отсканируй QR-код на сайте.',
+      `🎮 Привет! Этот бот используется для входа на сайт через QR-код.\n\n` +
+        `🌐 Перейди на сайт: https://games-hub-web.vercel.app\n` +
+        `📷 На сайте появится QR-код — отсканируй его этим ботом, чтобы авторизоваться.`,
     );
+
+    await this.sendStartButton(chatId);
+  }
+
+  private async sendStartButton(chatId: number): Promise<void> {
+    await this.bot.sendMessage(chatId, 'Нажми кнопку, чтобы начать:', {
+      reply_markup: {
+        keyboard: [[{ text: '/start' }]],
+        resize_keyboard: true,
+        one_time_keyboard: false,
+      },
+    });
   }
 }
