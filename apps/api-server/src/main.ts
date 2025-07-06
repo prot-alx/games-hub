@@ -7,9 +7,9 @@ import * as https from 'https';
 
 async function bootstrap() {
   const isProd = process.env.NODE_ENV === 'production';
-  
+
   const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'debug', 'error', 'verbose', 'warn']
+    logger: ['log', 'debug', 'error', 'verbose', 'warn'],
   });
 
   app.use(cookieParser());
@@ -28,27 +28,27 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
   }
   await app.init();
-  
+
   console.log('=== ПРОВЕРКА РОУТОВ ===');
   const httpAdapter = app.getHttpAdapter();
   const instance = httpAdapter.getInstance();
   console.log('HTTP adapter type:', httpAdapter.constructor.name);
   console.log('Routes registered:', !!instance._router);
-  
+
   const port = Number(process.env.PORT) || (isProd ? 49236 : 3001);
 
   if (isProd) {
     const isWindows = process.platform === 'win32';
     const httpsOptions = {
       key: fs.readFileSync(
-        isWindows 
+        isWindows
           ? './certs/key.pem'
-          : '/etc/letsencrypt/live/gameshub.duckdns.org/privkey.pem'
+          : '/etc/letsencrypt/live/gameshub.duckdns.org/privkey.pem',
       ),
       cert: fs.readFileSync(
-        isWindows 
+        isWindows
           ? './certs/cert.pem'
-          : '/etc/letsencrypt/live/gameshub.duckdns.org/fullchain.pem'
+          : '/etc/letsencrypt/live/gameshub.duckdns.org/fullchain.pem',
       ),
     };
     const server = https.createServer(
