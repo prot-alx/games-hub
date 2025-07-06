@@ -1,11 +1,16 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { AuthService } from '../auth/auth.service';
+import { TelegramUser } from 'src/auth/types';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
   private bot: TelegramBot;
   private readonly logger = new Logger(TelegramService.name);
+  private readonly pendingSessions = new Map<
+    number,
+    { sessionId: string; userData: TelegramUser }
+  >();
 
   constructor(private readonly authService: AuthService) {}
 
@@ -37,6 +42,12 @@ export class TelegramService implements OnModuleInit {
     this.bot.onText(/\/start$/, (msg) => {
       this.handleStartCommand(msg).catch((error) => {
         this.logger.error('Ошибка в handleStartCommand:', error);
+      });
+    });
+
+    this.bot.on('callback_query', (query) => {
+      this.handleCallbackQuery(query).catch((error) => {
+        this.logger.error('Ошибка в handleCallbackQuery:', error);
       });
     });
 
@@ -74,47 +85,105 @@ export class TelegramService implements OnModuleInit {
 
     const sessionId = match[1];
 
-    try {
-      this.authService.confirmLogin(sessionId, {
-        id: msg.from.id,
-        username: msg.from.username,
-        first_name: msg.from.first_name,
-        last_name: msg.from.last_name,
-      });
+    const userData: TelegramUser & { is_bot: boolean } = {
+      id: msg.from.id,
+      first_name: msg.from.first_name,
+      is_bot: msg.from.is_bot,
+      username: msg.from.username,
+      last_name: msg.from.last_name,
+    };
 
-      await this.bot.sendMessage(
-        chatId,
-        '✅ Вход подтвержден! Вернитесь на вкладку браузера!',
+    this.pendingSessions.set(chatId, { sessionId, userData });
+
+    const displayName =
+      (userData.first_name || userData.username) ?? `ID: ${userData.id}`;
+
+    await this.bot.sendMessage(
+      chatId,
+      `🔐 Подтвердить вход на сайт?\n\n👤 Пользователь: ${displayName}`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: '✅ Да', callback_data: 'confirm_login' },
+              { text: '❌ Нет', callback_data: 'decline_login' },
+            ],
+          ],
+        },
+      },
+    );
+  }
+
+  private async handleCallbackQuery(
+    query: TelegramBot.CallbackQuery,
+  ): Promise<void> {
+    const chatId = query.message?.chat.id;
+    const messageId = query.message?.message_id;
+
+    if (!chatId || !messageId) return;
+
+    await this.bot.answerCallbackQuery(query.id);
+
+    const pendingSession = this.pendingSessions.get(chatId);
+    if (!pendingSession) {
+      await this.bot.editMessageText(
+        '❌ Сессия истекла. Отсканируйте QR-код заново.',
+        {
+          chat_id: chatId,
+          message_id: messageId,
+        },
       );
-    } catch (error: unknown) {
-      const message = this.getErrorMessage(error);
-
-      this.logger.error(`Ошибка входа (${msg.from.id}):`, message);
-
-      if (message.includes('истекла')) {
-        await this.bot.sendMessage(
-          chatId,
-          '❌ QR-код устарел. Отсканируй новый код на сайте.',
-        );
-      } else if (message.includes('использован')) {
-        await this.bot.sendMessage(chatId, '❌ Этот QR-код уже использован.');
-      } else if (message.includes('частые попытки')) {
-        await this.bot.sendMessage(
-          chatId,
-          '❌ Слишком частые попытки. Подожди 2 секунды.',
-        );
-      } else if (message.includes('заблокирована')) {
-        await this.bot.sendMessage(
-          chatId,
-          '❌ Сессия заблокирована из-за подозрительной активности.',
-        );
-      } else {
-        await this.bot.sendMessage(
-          chatId,
-          '❌ Ошибка входа. Попробуй отсканировать QR-код заново.',
-        );
-      }
+      return;
     }
+
+    if (query.data === 'confirm_login') {
+      try {
+        this.authService.confirmLogin(
+          pendingSession.sessionId,
+          pendingSession.userData,
+        );
+
+        await this.bot.editMessageText(
+          '✅ Вход подтвержден! Вернитесь на вкладку браузера!',
+          {
+            chat_id: chatId,
+            message_id: messageId,
+          },
+        );
+      } catch (error: unknown) {
+        const message = this.getErrorMessage(error);
+        this.logger.error(
+          `Ошибка входа (${pendingSession.userData.id}):`,
+          message,
+        );
+
+        let errorText =
+          '❌ Ошибка входа. Попробуйте отсканировать QR-код заново.';
+
+        if (message.includes('истекла')) {
+          errorText = '❌ QR-код устарел. Отсканируйте новый код на сайте.';
+        } else if (message.includes('использован')) {
+          errorText = '❌ Этот QR-код уже использован.';
+        } else if (message.includes('частые попытки')) {
+          errorText = '❌ Слишком частые попытки. Подождите 2 секунды.';
+        } else if (message.includes('заблокирована')) {
+          errorText =
+            '❌ Сессия заблокирована из-за подозрительной активности.';
+        }
+
+        await this.bot.editMessageText(errorText, {
+          chat_id: chatId,
+          message_id: messageId,
+        });
+      }
+    } else if (query.data === 'decline_login') {
+      await this.bot.editMessageText('❌ Вход отклонен.', {
+        chat_id: chatId,
+        message_id: messageId,
+      });
+    }
+
+    this.pendingSessions.delete(chatId);
   }
 
   private async handleStartCommand(msg: TelegramBot.Message): Promise<void> {
@@ -131,7 +200,7 @@ export class TelegramService implements OnModuleInit {
   }
 
   private async sendStartButton(chatId: number): Promise<void> {
-    await this.bot.sendMessage(chatId, 'Нажми кнопку, чтобы начать:', {
+    await this.bot.sendMessage(chatId, '👇 Выберите действие:', {
       reply_markup: {
         keyboard: [[{ text: '/start' }]],
         resize_keyboard: true,
