@@ -26,6 +26,7 @@ out/
 .env
 .env.local
 .env.*.local
+.env.production
 
 # Системные файлы
 .DS_Store

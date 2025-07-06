@@ -9,6 +9,8 @@
     "start": "turbo start", 
     "lint": "turbo lint",
     "test": "turbo test",
+
+    "start:prod:api": "pnpm --filter ./apps/api-server run start:prod:env",
     
     "dev:api": "pnpm --filter ./apps/api-server run start:dev",
     "dev:web": "pnpm --filter ./apps/web run dev",

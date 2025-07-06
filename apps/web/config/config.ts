@@ -1,1 +1,3 @@
-export const API_URL = import.meta.env.PROD ? "https://editor.ddns.net:49236" : "http://localhost:3001";
+export const API_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_PROD_API_URL
+  : import.meta.env.VITE_LOCAL_API_URL;

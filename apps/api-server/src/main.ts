@@ -15,8 +15,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const allowedOrigins = isProd
-    ? ['https://games-hub-web.vercel.app', 'https://editor.ddns.net:49236']
-    : ['http://localhost:3000', 'http://localhost:5173'];
+    ? ['https://games-hub-web.vercel.app']
+    : ['http://localhost:5173'];
 
   app.enableCors({
     origin: allowedOrigins,

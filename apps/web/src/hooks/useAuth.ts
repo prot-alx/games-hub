@@ -19,7 +19,7 @@ export function useAuth() {
 
   const checkAuth = async (): Promise<boolean> => {
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/auth/me`, {
         credentials: "include",
       });
 
@@ -42,7 +42,7 @@ export function useAuth() {
 
   const logout = async (): Promise<void> => {
     try {
-      await fetch(API_URL, {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
