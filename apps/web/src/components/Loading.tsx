@@ -9,12 +9,10 @@ export default function Loading({
   message = "Загрузка...",
 }: Readonly<LoadingProps>) {
   return (
-    <div className="loading-container">
+    <div className="loading-overlay">
       <div className="loading-content">
-        <div className="spinner">
-          <Spinner />
-        </div>
-        <div>{message}</div>
+        <Spinner />
+        <div className="loading-message">{message}</div>
       </div>
     </div>
   );

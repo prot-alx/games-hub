@@ -1,9 +1,11 @@
-import Spinner from "../components/Spinner";
+import Loading from "../components/Loading";
 import { useAuth } from "../hooks/useAuth";
 import "./Dashboard.css";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+
+  if (!user) return <Loading message="Загрузка данных пользователя..." />;
 
   return (
     <div className="dashboard-container">
@@ -18,33 +20,26 @@ export default function Dashboard() {
         <main className="dashboard-main">
           <div className="user-card">
             <h2>Информация о пользователе</h2>
-            {user ? (
-              <div className="user-info">
-                <div className="info-item">
-                  <span className="info-label">ID:</span>
-                  <span className="info-value">
-                    {user.isGuest ? "Гость" : user.userId}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Username:</span>
-                  <span className="info-value">
-                    {user.username ?? "Не указан"}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Имя:</span>
-                  <span className="info-value">
-                    {user.first_name ?? "Не указано"}
-                  </span>
-                </div>
+            <div className="user-info">
+              <div className="info-item">
+                <span className="info-label">ID:</span>
+                <span className="info-value">
+                  {user.isGuest ? "Гость" : user.userId}
+                </span>
               </div>
-            ) : (
-              <div className="loading-user">
-                <Spinner />
-                <p>Загрузка данных пользователя...</p>
+              <div className="info-item">
+                <span className="info-label">Username:</span>
+                <span className="info-value">
+                  {user.username ?? "Не указан"}
+                </span>
               </div>
-            )}
+              <div className="info-item">
+                <span className="info-label">Имя:</span>
+                <span className="info-value">
+                  {user.first_name ?? "Не указано"}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Дополнительные карточки для будущего функционала */}
