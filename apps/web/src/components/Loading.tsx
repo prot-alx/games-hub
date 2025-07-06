@@ -1,4 +1,5 @@
 import "./Loading.css";
+import Spinner from "./Spinner";
 
 interface LoadingProps {
   message?: string;
@@ -9,7 +10,12 @@ export default function Loading({
 }: Readonly<LoadingProps>) {
   return (
     <div className="loading-container">
-      <div className="loading-content">{message}</div>
+      <div className="loading-content">
+        <div className="spinner">
+          <Spinner />
+        </div>
+        <div>{message}</div>
+      </div>
     </div>
   );
 }
