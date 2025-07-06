@@ -2,16 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import QRLogin from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import { useAuth } from "./hooks/useAuth";
+import Loading from "./components/Loading";
 
 function ProtectedRoute({ children }: Readonly<{ children: React.ReactNode }>) {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        Проверка авторизации...
-      </div>
-    );
+    return <Loading message="Проверка авторизации..." />;
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
@@ -21,11 +18,7 @@ function LoginRoute() {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        Загрузка...
-      </div>
-    );
+    return <Loading />;
   }
 
   return isAuthenticated ? <Navigate to="/" replace /> : <QRLogin />;
