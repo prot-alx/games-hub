@@ -1,0 +1,58 @@
+name: Deploy Backend to Production
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/api-server/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.13.1'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: '10.11.0'
+    
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          cd ~/apps/games-hub
+          echo "Pulling latest changes..."
+          git pull origin main
+          
+          echo "Installing dependencies..."
+          pnpm install
+          
+          echo "Building API..."
+          pnpm build:api
+          
+          echo "Restarting application..."
+          pkill -f "node dist/main.js" || true
+          sleep 2
+          nohup pnpm start:prod:api > /dev/null 2>&1 &
+          
+          echo "Waiting for startup..."
+          sleep 5
+          
+          echo "Testing API..."
+          curl -f -k https://gameshub.duckdns.org:49236/api/ || exit 1
+          
+          echo "Deployment successful!"
