@@ -5,7 +5,12 @@ import { useAuth } from "../hooks/useAuth";
 import "./Login.css";
 import { API_URL } from "../../config/config";
 
-type LoginStatus = "loading" | "pending" | "expired" | "success";
+type LoginStatus =
+  | "loading"
+  | "pending"
+  | "expired"
+  | "success"
+  | "server_error";
 
 export default function QRLogin() {
   const [qrData, setQrData] = useState("");
@@ -20,12 +25,18 @@ export default function QRLogin() {
       const res = await fetch(`${API_URL}/auth/qr/generate`, {
         method: "POST",
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
       const data = await res.json();
       setQrData(data.qrData);
       setSessionId(data.sessionId);
       setStatus("pending");
-    } catch {
-      setStatus("expired");
+    } catch (error) {
+      console.error("Ошибка подключения к серверу:", error);
+      setStatus("server_error");
     }
   };
 
@@ -41,6 +52,11 @@ export default function QRLogin() {
         const res = await fetch(`${API_URL}/auth/qr/status/${sessionId}`, {
           credentials: "include",
         });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
         const data = await res.json();
         if (data.status === "confirmed") {
           setStatus("success");
@@ -55,6 +71,8 @@ export default function QRLogin() {
         }
       } catch (e) {
         console.error("Error checking QR status:", e);
+        setStatus("server_error");
+        clearInterval(interval);
       }
     }, 2000);
 
@@ -147,6 +165,17 @@ export default function QRLogin() {
             <p>Время действия кода закончилось</p>
             <button onClick={generateQR} className="refresh-button">
               🔄 Создать новый QR-код
+            </button>
+          </div>
+        )}
+
+        {status === "server_error" && (
+          <div className="expired-state">
+            <div className="error-icon">🔌</div>
+            <h3>Сервер недоступен</h3>
+            <p>Не удается подключиться к серверу</p>
+            <button onClick={generateQR} className="refresh-button">
+              🔄 Попробовать снова
             </button>
           </div>
         )}
