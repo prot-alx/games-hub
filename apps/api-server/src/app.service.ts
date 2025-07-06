@@ -6,5 +6,3 @@ export class AppService {
     return 'Hello World!';
   }
 }
-// Test deployment
-// Trigger CI/CD
