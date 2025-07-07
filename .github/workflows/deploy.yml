@@ -1,51 +1,52 @@
 name: Deploy Backend to Production
 on:
- push:
-   branches: [ main ]
-   paths:
-     - 'apps/api-server/**'
-     - 'packages/**'
-     - 'package.json'
-     - 'pnpm-lock.yaml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/api-server/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
 
 jobs:
- deploy:
-   runs-on: ubuntu-latest
-   
-   steps:
-   - name: Deploy to server
-     uses: appleboy/ssh-action@v0.1.7
-     with:
-       host: ${{ secrets.HOST }}
-       username: ${{ secrets.USERNAME }}
-       key: ${{ secrets.PRIVATE_KEY }}
-       script: |
-         export PATH="/root/.nvm/versions/node/v22.13.1/bin:$PATH"
-         cd ~/apps/games-hub
-         echo "Pulling latest changes..."
-         git pull origin main
-         
-         echo "Installing dependencies..."
-         pnpm install
-         
-         echo "Building API..."
-         pnpm build:api
-         
-         echo "Restarting application with PM2..."
-         pm2 restart games-hub-api || pm2 start ecosystem.config.js
-         
-         echo "Waiting for API to be ready..."
-         for i in {1..12}; do
-           if curl -f -k https://gameshub.duckdns.org:49236/api/ > /dev/null 2>&1; then
-             echo "API is ready after $((i*5)) seconds"
-             break
-           fi
-           echo "Attempt $i/12, waiting 5 seconds..."
-           sleep 5
-         done
-         
-         echo "Testing API response..."
-         curl -f -k https://gameshub.duckdns.org:49236/api/ || exit 1
-         
-         echo "Deployment successful!"
-         pm2 status
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          export PATH="/root/.nvm/versions/node/v22.13.1/bin:$PATH"
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/github_key"
+          cd ~/apps/games-hub
+          echo "Pulling latest changes..."
+          git pull origin main
+          
+          echo "Installing dependencies..."
+          pnpm install
+          
+          echo "Building API..."
+          pnpm build:api
+          
+          echo "Restarting application with PM2..."
+          pm2 restart games-hub-api || pm2 start ecosystem.config.js
+          
+          echo "Waiting for API to be ready..."
+          for i in {1..12}; do
+            if curl -f -k https://gameshub.duckdns.org:49236/api/ > /dev/null 2>&1; then
+              echo "API is ready after $((i*3)) seconds"
+              break
+            fi
+            echo "Attempt $i/12, waiting 3 seconds..."
+            sleep 3
+          done
+          
+          echo "Testing API response..."
+          curl -f -k https://gameshub.duckdns.org:49236/api/ || exit 1
+          
+          echo "Deployment successful!"
+          pm2 status
