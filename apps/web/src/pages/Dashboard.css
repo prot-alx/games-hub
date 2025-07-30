@@ -6,8 +6,6 @@
 }
 
 .dashboard-content {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -52,6 +50,10 @@
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+}
+
+.stats-grid {
+  padding: 2rem 0;
 }
 
 .user-card {
